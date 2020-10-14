@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Title</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+
+<body>
+    <a href="/users/logout" class="btn btn-secondary">Logout</a>
+    <h1 class="mt-4">Deliver Me</h1>
+    <p class="lead mb-3">Welcome <%= user.user_name %>
+
+    <form action="/users/request_buy" method="POST" enctype="multipart/form-data">
+
+        <div class="form-group">
+            <label for="pname">Product name</label>
+            <input type="text" class="form-control" name='pname' placeholder="Product name" required value="Drafter">
+        </div>
+        <div class="form-group">
+            <label for="pprice">Product price</label>
+            <input type="number" class="form-control" name='pprice' placeholder="Product's expected price" required
+                value="200">
+        </div>
+
+        <div class="form-group">
+
+            <label for="pdesc">Product Description</label>
+            <textarea class="form-control" name="pdesc" id="" rows="3"
+                required>for engineering graphics college purpose .any company is ok</textarea>
+        </div>
+        <div class="form-group">
+            <label for="file" class="col-md-3 control-label">Product Image</label>
+            <div class="col-sm-9">
+                <input class="form-control" type="file" name="file" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="rprice">Reward price</label>
+            <input type="number" class="form-control" name='rprice' placeholder="Reward Price for the buyers" required
+                value="50">
+        </div>
+        <div class="form group m-4">
+            <label for="rprice">Delivery Location</label>
+            <div class="container d-flex p-3">
+                <div id="map" style="height: 30rem ;width:100%; align-content: center;" class="m-4"></div>
+            </div>
+            <button class="btn btn-success" id='location_btn' type="button">get location</button><br>
+            <input type="hidden" id="lat1" name="lat1" value="3487">
+            <input type="hidden" id="lng1" name="lng1" value="3487">
+        </div>
+        <div class="form group m-4">
+            <label for="rprice">Where do you think the product be available</label>
+            <div class="container d-flex m-4">
+                <div id="map2" style="height: 30rem ;width:100%; align-content: center;"></div>
+            </div>
+
+            <input type="hidden" id="lat2" name="lat2" value="13.0827">
+            <input type="hidden" id="lng2" name="lng2" value="80.2707">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+
+
+
+    </form>
+
+    <script>
+
+        var map, infoWindow;
+        const location_btn = document.getElementById('location_btn');
+
+        function initMap() {
+
+
+            var reqpos;
+            var reqpos2;
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 13.0109, lng: 80.2354 },
+                zoom: 11
+            });
+            map2 = new google.maps.Map(document.getElementById('map2'), {
+                center: { lat: 13.0827, lng: 80.2707 },
+                zoom: 11
+            });
+
+            const geocoder = new google.maps.Geocoder();
+            var marker = new google.maps.Marker({ position: { lat: 13.0827, lng: 80.2707 }, map: map });
+            var marker2 = new google.maps.Marker({ position: { lat: 13.0827, lng: 80.2707 }, map: map2 });
+            infoWindow = new google.maps.InfoWindow;
+
+            // Try HTML5 geolocation.
+            function getlocation() {
+                marker.setMap(null);
+                if (navigator.geolocation) {
+
+                    navigator.geolocation.getCurrentPosition(function (position) {
+
+                        var pos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        marker = new google.maps.Marker({ position: pos, map: map })
+                        reqpos = pos;
+                        document.getElementById('lat1').value = (pos.lat);
+                        document.getElementById('lng1').value = (pos.lng);
+
+                        map.setCenter(pos);
+                        map.setZoom(16);
+                    }, function () {
+                        handleLocationError(true, infoWindow, map.getCenter());
+                    });
+                } else {
+                    // Browser doesn't support Geolocation
+                    handleLocationError(false, infoWindow, map.getCenter());
+                }
+            }
+            getlocation();
+            location_btn.addEventListener('click', function (event) {
+                getlocation();
+            })
+            function addmarker(props) {
+                marker.setMap(null);
+                marker = new google.maps.Marker({
+                    position: props.coords,
+                    map: map
+                })
+            }
+            function addmarker2(props) {
+                marker2.setMap(null);
+                marker2 = new google.maps.Marker({
+                    position: props.coords,
+                    map: map2
+                })
+            }
+
+
+
+            google.maps.event.addListener(map, 'click', function (event) {
+
+                addmarker({ coords: event.latLng });
+                var temp = event.latLng;
+                reqpos = {
+                    lat: temp.lat(),
+                    lng: temp.lng()
+                }
+                document.getElementById('lat1').value = reqpos.lat;
+                document.getElementById('lng1').value = reqpos.lng;
+                //geocodelatlng(geocoder, reqpos);
+
+
+
+            })
+            google.maps.event.addListener(map2, 'click', function (event) {
+
+                addmarker2({ coords: event.latLng });
+                var temp = event.latLng;
+                reqpos2 = {
+                    lat: temp.lat(),
+                    lng: temp.lng()
+                }
+                document.getElementById('lat2').value = reqpos2.lat;
+                document.getElementById('lng2').value = reqpos2.lng;
+                //geocodelatlng(geocoder, reqpos);
+
+
+
+            })
+
+        }
+
+
+
+        function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+            infoWindow.setPosition(pos);
+            infoWindow.setContent(browserHasGeolocation ?
+                'Error: The Geolocation service failed.' :
+                'Error: Your browser doesn\'t support geolocation.');
+            infoWindow.open(map);
+        }
+        //requires billing info
+        function geocodelatlng(geocoder, reqpos) {
+            geocoder.geocode({ location: reqpos }, (results, status) => {
+                if (status === "OK") {
+                    if (results[0]) {
+                        $('#address').text(results[0].formatted_address);
+                    }
+                    else {
+                        window.alert("no result found");
+                    }
+                }
+                else {
+                    window.alert("geocoder failed to " + status);
+                }
+            })
+        }
+
+
+
+
+    </script>
+
+
+    <script defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC-tnhh2AhTi_KtnD5vYsGivalaCszlpVY&callback=initMap">
+        </script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
